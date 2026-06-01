@@ -1,0 +1,33 @@
+# .claudeignore — file esclusi dal contesto di Claude Code
+
+# Dipendenze
+node_modules/
+
+# Build output
+.next/
+out/
+dist/
+
+# Git internals
+.git/
+
+# Cache e log
+.cache/
+*.log
+npm-debug.log*
+
+# Environment (mai condividere)
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel/
+
+# TypeScript build info
+*.tsbuildinfo
+next-env.d.ts
