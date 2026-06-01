@@ -20,6 +20,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: "#0284c7",
+  viewportFit: "cover", // iPhone notch / Dynamic Island safe area
 };
 
 export default function RootLayout({

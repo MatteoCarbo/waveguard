@@ -8,3 +8,13 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* iPhone notch / Dynamic Island safe area */
+.pt-safe {
+  padding-top: max(1.5rem, env(safe-area-inset-top));
+}
+
+/* Desktop: background fills the full window behind the centered card */
+body {
+  background-color: #0284c7;
+}

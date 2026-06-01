@@ -6,12 +6,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Waves, RefreshCw } from "lucide-react";
 
 import { Beach } from "@/types";
-import { BEACHES } from "@/lib/beaches";
+import { BEACHES, findNearestBeach } from "@/lib/beaches";
 import { getBeachForecast } from "@/lib/forecast";
 import BeachSelector from "@/components/BeachSelector";
 import ScoreCard from "@/components/ScoreCard";
 import DayStrip from "@/components/DayStrip";
 import StatusBadge from "@/components/StatusBadge";
+import { LocateFixed } from "lucide-react";
 
 // Default beach: Praia da Arrábida — beautiful and well-known
 const DEFAULT_BEACH = BEACHES.find((b) => b.id === "praia-da-arrábida") ?? BEACHES[0];
@@ -19,6 +20,28 @@ const DEFAULT_BEACH = BEACHES.find((b) => b.id === "praia-da-arrábida") ?? BEAC
 export default function Home() {
   const [beach, setBeach] = useState<Beach>(DEFAULT_BEACH);
   const [dayIndex, setDayIndex] = useState(0);
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [geoError, setGeoError] = useState(false);
+
+  const handleLocate = () => {
+    if (!navigator.geolocation) return;
+    setGeoLoading(true);
+    setGeoError(false);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const nearest = findNearestBeach(pos.coords.latitude, pos.coords.longitude);
+        setBeach(nearest);
+        setDayIndex(0);
+        setGeoLoading(false);
+      },
+      () => {
+        setGeoLoading(false);
+        setGeoError(true);
+        setTimeout(() => setGeoError(false), 3000);
+      },
+      { timeout: 8000 }
+    );
+  };
 
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ["forecast", beach.id],
@@ -28,9 +51,10 @@ export default function Home() {
   const today = data?.forecasts[dayIndex];
 
   return (
-    <main className="min-h-dvh bg-gradient-to-b from-sky-600 via-sky-500 to-sky-400 flex flex-col">
-      {/* Header */}
-      <header className="px-4 pt-6 pb-4">
+    // max-w-md: centres the app on desktop, fills screen on mobile
+    <main className="min-h-dvh w-full max-w-md mx-auto bg-gradient-to-b from-sky-600 via-sky-500 to-sky-400 flex flex-col">
+      {/* Header — pt-safe handles iPhone notch / Dynamic Island */}
+      <header className="px-4 pt-safe pb-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Waves className="w-6 h-6 text-white" strokeWidth={2.5} />
@@ -48,6 +72,15 @@ export default function Home() {
           </button>
         </div>
         <BeachSelector current={beach} onSelect={(b) => { setBeach(b); setDayIndex(0); }} />
+        {/* Geolocation button */}
+        <button
+          onClick={handleLocate}
+          disabled={geoLoading}
+          className="mt-2 flex items-center gap-1.5 text-white/80 hover:text-white text-xs font-medium transition-colors"
+        >
+          <LocateFixed className={`w-3.5 h-3.5 ${geoLoading ? "animate-spin" : ""}`} />
+          {geoLoading ? "Finding nearest beach…" : geoError ? "Location unavailable" : "Use my location"}
+        </button>
       </header>
 
       {/* Content */}
@@ -109,6 +142,11 @@ export default function Home() {
                 {/* Beach description */}
                 <p className="text-xs text-slate-400 text-center px-2">
                   📍 {beach.description}
+                </p>
+
+                {/* Disclaimer */}
+                <p className="text-[11px] text-slate-300 text-center leading-relaxed px-4 pt-2">
+                  ⚠️ For informational use only. Always follow local beach flag warnings and lifeguard instructions.
                 </p>
               </motion.div>
             </AnimatePresence>
