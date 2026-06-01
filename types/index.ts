@@ -5,6 +5,7 @@ export interface Beach {
   lat: number;
   lon: number;
   description: string;
+  hazards?: string; // static local knowledge: rocky bottom, rip currents, etc.
 }
 
 export type SafetyLevel = "safe" | "caution" | "danger";
@@ -30,6 +31,7 @@ export interface SafetyScore {
     swellHeightM: number;
     windKph: number;
     windGustsKph: number;
+    waterTempC: number;
   };
 }
 

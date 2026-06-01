@@ -20,7 +20,7 @@ const SAFETY_DETAILS = (s: SafetyScore) => [
   { label: "Waves", value: `${s.details.waveHeightM.toFixed(1)} m` },
   { label: "Swell", value: `${s.details.swellHeightM.toFixed(1)} m` },
   { label: "Wind", value: `${Math.round(s.details.windKph)} km/h` },
-  { label: "Gusts", value: `${Math.round(s.details.windGustsKph)} km/h` },
+  { label: "Water", value: `${Math.round(s.details.waterTempC)}°C` },
 ];
 
 const LEVEL_BORDER: Record<SafetyLevel, string> = {

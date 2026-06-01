@@ -12,7 +12,9 @@ import BeachSelector from "@/components/BeachSelector";
 import ScoreCard from "@/components/ScoreCard";
 import DayStrip from "@/components/DayStrip";
 import StatusBadge from "@/components/StatusBadge";
-import { LocateFixed } from "lucide-react";
+import UVCard from "@/components/UVCard";
+import EmergencyCard from "@/components/EmergencyCard";
+import { LocateFixed, AlertTriangle } from "lucide-react";
 
 // Default beach: Praia da Arrábida — beautiful and well-known
 const DEFAULT_BEACH = BEACHES.find((b) => b.id === "praia-da-arrábida") ?? BEACHES[0];
@@ -76,10 +78,14 @@ export default function Home() {
         <button
           onClick={handleLocate}
           disabled={geoLoading}
-          className="mt-2 flex items-center gap-1.5 text-white/80 hover:text-white text-xs font-medium transition-colors"
+          className="mt-2 flex items-center gap-1.5 text-white/80 hover:text-white text-xs font-medium transition-colors disabled:opacity-50"
         >
           <LocateFixed className={`w-3.5 h-3.5 ${geoLoading ? "animate-spin" : ""}`} />
-          {geoLoading ? "Finding nearest beach…" : geoError ? "Location unavailable" : "Use my location"}
+          {geoLoading
+            ? "Finding nearest beach…"
+            : geoError
+            ? "Location blocked — works on HTTPS"
+            : "Use my location"}
         </button>
       </header>
 
@@ -120,24 +126,54 @@ export default function Home() {
                 transition={{ duration: 0.25 }}
                 className="flex flex-col gap-5"
               >
-                {/* Overall hero card */}
+                {/* Hero card — at-a-glance overview, no repeated text */}
                 <div className="bg-white rounded-2xl shadow-sm p-5 flex flex-col gap-3">
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
                     {dayIndex === 0 ? "Today" : dayIndex === 1 ? "Tomorrow" : formatDate(data.forecasts[dayIndex].date)}
                     {" · "}{beach.name}
                   </p>
-                  <div className="flex items-center gap-3">
-                    <StatusBadge level={today.safety.level} size="lg" />
-                    <span className="text-slate-400 text-sm">to swim</span>
+                  {/* Two badges side by side */}
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wide">Swimming</span>
+                      <StatusBadge level={today.safety.level} size="lg" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wide">Beach day</span>
+                      <StatusBadge level={today.comfort.level} size="lg" />
+                    </div>
+                    {/* Water temperature */}
+                    <div className="flex flex-col gap-1 ml-auto">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wide">Water</span>
+                      <span className="text-lg font-black text-slate-700">
+                        {Math.round(today.safety.details.waterTempC)}°C
+                      </span>
+                    </div>
                   </div>
-                  <p className="text-slate-600 text-sm leading-relaxed">
-                    {today.safety.summary}
-                  </p>
                 </div>
 
-                {/* Two score cards */}
+                {/* Score cards */}
                 <ScoreCard type="safety" score={today.safety} />
                 <ScoreCard type="comfort" score={today.comfort} />
+
+                {/* UV card */}
+                <UVCard uvIndex={today.comfort.details.uvIndex} />
+
+                {/* Local hazards — only shown if beach has specific hazards */}
+                {beach.hazards && (
+                  <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 flex gap-3">
+                    <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-bold text-amber-700 uppercase tracking-wide mb-1">
+                        Local Hazards
+                      </p>
+                      <p className="text-xs text-amber-800 leading-relaxed">{beach.hazards}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Emergency numbers */}
+                <EmergencyCard />
 
                 {/* Beach description */}
                 <p className="text-xs text-slate-400 text-center px-2">

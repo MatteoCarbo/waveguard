@@ -49,6 +49,7 @@ export function scoreSafety(d: RawDayData): SafetyScore {
       swellHeightM: d.swellHeightM,
       windKph: wind,
       windGustsKph: gusts,
+      waterTempC: d.waterTempC,
     },
   };
 }

@@ -10,6 +10,7 @@ export interface RawDayData {
   waveHeightM: number;
   swellHeightM: number;
   wavePeriodS: number;
+  waterTempC: number;
   // Weather
   temperatureC: number;
   windKph: number;
@@ -23,6 +24,7 @@ export async function fetchBeachData(beach: Beach): Promise<RawDayData[]> {
     "wave_height_max",
     "swell_wave_height_max",
     "wave_period_max",
+    "sea_surface_temperature_max",
   ].join(",");
 
   const weatherParams = [
@@ -58,6 +60,7 @@ export async function fetchBeachData(beach: Beach): Promise<RawDayData[]> {
     waveHeightM: marine.daily.wave_height_max[i] ?? 0,
     swellHeightM: marine.daily.swell_wave_height_max[i] ?? 0,
     wavePeriodS: marine.daily.wave_period_max[i] ?? 0,
+    waterTempC: marine.daily.sea_surface_temperature_max[i] ?? 18,
     temperatureC: weather.daily.temperature_2m_max[i] ?? 20,
     windKph: weather.daily.wind_speed_10m_max[i] ?? 0,
     windGustsKph: weather.daily.wind_gusts_10m_max[i] ?? 0,
