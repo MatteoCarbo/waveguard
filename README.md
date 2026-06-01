@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌊 WaveGuard
 
-## Getting Started
+**Know before you go.** WaveGuard tells tourists and casual swimmers whether a Portugal beach is safe to visit today — in plain English, at a glance.
 
-First, run the development server:
+![WaveGuard screenshot](public/screenshot.png)
+
+## What it does
+
+For any of 30 Portugal beaches, WaveGuard shows two independent scores:
+
+| Score | What it answers |
+|-------|----------------|
+| 🟢🟡🔴 **Safety** | Is it dangerous to swim? (waves, swell, wind) |
+| 🌞 **Comfort** | Is it a nice beach day? (temperature, rain, wind) |
+
+A day can be sunny and beautiful but dangerous for swimming — or grey and cold but flat-calm water. The two scores are always shown separately.
+
+Includes a **6-day forecast** so you can plan ahead.
+
+## Tech stack
+
+| | |
+|---|---|
+| Framework | [Next.js 15](https://nextjs.org) (App Router) |
+| Styling | [Tailwind CSS](https://tailwindcss.com) |
+| Animations | [Framer Motion](https://www.framer.com/motion/) |
+| Data fetching | [TanStack Query](https://tanstack.com/query) |
+| Weather API | [Open-Meteo](https://open-meteo.com) — free, no key needed |
+| Deployment | [Vercel](https://vercel.com) |
+
+## Running locally
 
 ```bash
+git clone https://github.com/MatteoCarbo/waveguard.git
+cd waveguard
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+No API keys, no `.env` file, no backend. It just works.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## How the safety score works
 
-## Learn More
+Safety is calculated from Open-Meteo's free Marine API:
 
-To learn more about Next.js, take a look at the following resources:
+- **Wave height** (70% weight): < 0.5m → safe · 0.5–1m → caution · > 1.5m → danger
+- **Wind speed** (30% weight): < 30 km/h → fine · > 50 km/h → danger
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The comfort score uses temperature (50%), rain probability (30%), and wind (20%).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Both scores are computed client-side in [`lib/scoring.ts`](lib/scoring.ts) — no server needed.
 
-## Deploy on Vercel
+## Adding beaches
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Edit [`lib/beaches.ts`](lib/beaches.ts). Each beach needs a name, region, latitude, longitude, and a short description. Open-Meteo covers any coordinate worldwide.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deploy to Vercel
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/MatteoCarbo/waveguard)
+
+## License
+
+MIT — see [LICENSE](LICENSE).
