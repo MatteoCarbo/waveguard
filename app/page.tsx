@@ -3,18 +3,19 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Waves, RefreshCw } from "lucide-react";
+import { Waves, RefreshCw, Menu, Heart, LocateFixed, AlertTriangle } from "lucide-react";
 
 import { Beach } from "@/types";
 import { BEACHES, findNearestBeach } from "@/lib/beaches";
 import { getBeachForecast } from "@/lib/forecast";
+import { useFavorites } from "@/lib/useFavorites";
 import BeachSelector from "@/components/BeachSelector";
 import ScoreCard from "@/components/ScoreCard";
 import DayStrip from "@/components/DayStrip";
 import StatusBadge from "@/components/StatusBadge";
 import UVCard from "@/components/UVCard";
 import EmergencyCard from "@/components/EmergencyCard";
-import { LocateFixed, AlertTriangle } from "lucide-react";
+import SideDrawer from "@/components/SideDrawer";
 
 // Default beach: Praia da Arrábida — beautiful and well-known
 const DEFAULT_BEACH = BEACHES.find((b) => b.id === "praia-da-arrábida") ?? BEACHES[0];
@@ -22,8 +23,10 @@ const DEFAULT_BEACH = BEACHES.find((b) => b.id === "praia-da-arrábida") ?? BEAC
 export default function Home() {
   const [beach, setBeach] = useState<Beach>(DEFAULT_BEACH);
   const [dayIndex, setDayIndex] = useState(0);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
   const [geoError, setGeoError] = useState(false);
+  const { favorites, toggle, isFavorite, isFull } = useFavorites();
 
   const handleLocate = () => {
     if (!navigator.geolocation) return;
@@ -52,42 +55,79 @@ export default function Home() {
 
   const today = data?.forecasts[dayIndex];
 
+  const saved = isFavorite(beach.id);
+
   return (
-    // max-w-md: centres the app on desktop, fills screen on mobile
-    <main className="min-h-dvh w-full max-w-md mx-auto bg-gradient-to-b from-sky-600 via-sky-500 to-sky-400 flex flex-col">
-      {/* Header — pt-safe handles iPhone notch / Dynamic Island */}
-      <header className="px-4 pt-safe pb-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Waves className="w-6 h-6 text-white" strokeWidth={2.5} />
-            <span className="text-white font-black text-xl tracking-tight">WaveGuard</span>
+    <>
+      {/* Side drawer */}
+      <SideDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        favoriteIds={favorites}
+        onSelectBeach={(b) => { setBeach(b); setDayIndex(0); }}
+        onRemoveFavorite={toggle}
+      />
+
+      {/* max-w-md: centres the app on desktop, fills screen on mobile */}
+      <main className="min-h-dvh w-full max-w-md mx-auto bg-gradient-to-b from-sky-600 via-sky-500 to-sky-400 flex flex-col">
+        {/* Header — pt-safe handles iPhone notch / Dynamic Island */}
+        <header className="px-4 pt-safe pb-4">
+          <div className="flex items-center justify-between mb-4">
+            {/* Hamburger */}
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              aria-label="Open menu"
+            >
+              <Menu className="w-5 h-5 text-white" />
+            </button>
+
+            {/* Logo */}
+            <div className="flex items-center gap-2">
+              <Waves className="w-5 h-5 text-white" strokeWidth={2.5} />
+              <span className="text-white font-black text-lg tracking-tight">WaveGuard</span>
+            </div>
+
+            {/* Refresh */}
+            <button
+              onClick={() => refetch()}
+              disabled={isFetching}
+              className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              aria-label="Refresh"
+            >
+              <RefreshCw className={`w-4 h-4 text-white ${isFetching ? "animate-spin" : ""}`} />
+            </button>
           </div>
-          <button
-            onClick={() => refetch()}
-            disabled={isFetching}
-            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-            aria-label="Refresh"
-          >
-            <RefreshCw
-              className={`w-4 h-4 text-white ${isFetching ? "animate-spin" : ""}`}
-            />
-          </button>
-        </div>
-        <BeachSelector current={beach} onSelect={(b) => { setBeach(b); setDayIndex(0); }} />
-        {/* Geolocation button */}
-        <button
-          onClick={handleLocate}
-          disabled={geoLoading}
-          className="mt-2 flex items-center gap-1.5 text-white/80 hover:text-white text-xs font-medium transition-colors disabled:opacity-50"
-        >
-          <LocateFixed className={`w-3.5 h-3.5 ${geoLoading ? "animate-spin" : ""}`} />
-          {geoLoading
-            ? "Finding nearest beach…"
-            : geoError
-            ? "Location blocked — works on HTTPS"
-            : "Use my location"}
-        </button>
-      </header>
+
+          <BeachSelector current={beach} onSelect={(b) => { setBeach(b); setDayIndex(0); }} />
+
+          {/* Geo + heart */}
+          <div className="flex items-center justify-between mt-2">
+            <button
+              onClick={handleLocate}
+              disabled={geoLoading}
+              className="flex items-center gap-1.5 text-white/80 hover:text-white text-xs font-medium transition-colors disabled:opacity-50"
+            >
+              <LocateFixed className={`w-3.5 h-3.5 ${geoLoading ? "animate-spin" : ""}`} />
+              {geoLoading ? "Finding nearest beach…" : geoError ? "Location blocked — works on HTTPS" : "Use my location"}
+            </button>
+
+            {/* Favourite toggle */}
+            <button
+              onClick={() => toggle(beach.id)}
+              disabled={!saved && isFull}
+              className="flex items-center gap-1 text-xs transition-colors disabled:opacity-30"
+              aria-label={saved ? "Remove from favourites" : "Add to favourites"}
+            >
+              <Heart
+                className={`w-4 h-4 transition-all ${saved ? "fill-white text-white scale-110" : "text-white/60"}`}
+              />
+              <span className={saved ? "text-white" : "text-white/60"}>
+                {saved ? "Saved" : isFull ? "Full" : "Save"}
+              </span>
+            </button>
+          </div>
+        </header>
 
       {/* Content */}
       <div className="flex-1 bg-slate-50 rounded-t-3xl px-4 pt-6 pb-8 flex flex-col gap-5">
@@ -188,8 +228,9 @@ export default function Home() {
             </AnimatePresence>
           </>
         )}
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   );
 }
 
