@@ -16,6 +16,7 @@ import StatusBadge from "@/components/StatusBadge";
 import UVCard from "@/components/UVCard";
 import EmergencyCard from "@/components/EmergencyCard";
 import SideDrawer from "@/components/SideDrawer";
+import LifeguardCard from "@/components/LifeguardCard";
 
 // Default beach: Praia da Arrábida — beautiful and well-known
 const DEFAULT_BEACH = BEACHES.find((b) => b.id === "praia-da-arrábida") ?? BEACHES[0];
@@ -182,13 +183,15 @@ export default function Home() {
                       <span className="text-[10px] text-slate-400 uppercase tracking-wide">Beach day</span>
                       <StatusBadge level={today.comfort.level} size="lg" />
                     </div>
-                    {/* Water temperature */}
-                    <div className="flex flex-col gap-1 ml-auto">
-                      <span className="text-[10px] text-slate-400 uppercase tracking-wide">Water</span>
-                      <span className="text-lg font-black text-slate-700">
-                        {Math.round(today.safety.details.waterTempC)}°C
-                      </span>
-                    </div>
+                    {/* Water temperature — hidden if API returns no data */}
+                    {Number.isFinite(today.safety.details.waterTempC) && (
+                      <div className="flex flex-col gap-1 ml-auto">
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wide">Water</span>
+                        <span className="text-lg font-black text-slate-700">
+                          {Math.round(today.safety.details.waterTempC)}°C
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -196,8 +199,15 @@ export default function Home() {
                 <ScoreCard type="safety" score={today.safety} />
                 <ScoreCard type="comfort" score={today.comfort} />
 
-                {/* UV card */}
-                <UVCard uvIndex={today.comfort.details.uvIndex} />
+                {/* UV card — hidden if API returns no data */}
+                {Number.isFinite(today.comfort.details.uvIndex) && (
+                  <UVCard uvIndex={today.comfort.details.uvIndex} />
+                )}
+
+                {/* Lifeguard status */}
+                {beach.lifeguard && (
+                  <LifeguardCard lifeguard={beach.lifeguard} date={data.forecasts[dayIndex].date} />
+                )}
 
                 {/* Local hazards — only shown if beach has specific hazards */}
                 {beach.hazards && (

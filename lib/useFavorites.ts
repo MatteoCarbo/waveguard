@@ -1,46 +1,37 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 
 const STORAGE_KEY = "waveguard_favorites";
 export const MAX_FAVORITES = 10;
 
+function readFromStorage(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 export function useFavorites() {
-  const [favorites, setFavorites] = useState<string[]>([]);
-  const [hydrated, setHydrated] = useState(false);
+  // Lazy initializer runs once on mount — reads localStorage without needing an effect
+  const [favorites, setFavorites] = useState<string[]>(readFromStorage);
 
-  // Read from localStorage on mount (client-only)
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setFavorites(JSON.parse(raw));
-    } catch {}
-    setHydrated(true);
+  const toggle = useCallback((beachId: string) => {
+    setFavorites((prev) => {
+      const next = prev.includes(beachId)
+        ? prev.filter((id) => id !== beachId)
+        : prev.length < MAX_FAVORITES
+        ? [...prev, beachId]
+        : prev; // already full — silently ignore
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
   }, []);
-
-  const persist = useCallback((ids: string[]) => {
-    setFavorites(ids);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
-    } catch {}
-  }, []);
-
-  const toggle = useCallback(
-    (beachId: string) => {
-      setFavorites((prev) => {
-        const next = prev.includes(beachId)
-          ? prev.filter((id) => id !== beachId)
-          : prev.length < MAX_FAVORITES
-          ? [...prev, beachId]
-          : prev; // already full — silently ignore
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-        } catch {}
-        return next;
-      });
-    },
-    []
-  );
 
   const isFavorite = useCallback(
     (beachId: string) => favorites.includes(beachId),
@@ -49,5 +40,6 @@ export function useFavorites() {
 
   const isFull = favorites.length >= MAX_FAVORITES;
 
-  return { favorites, toggle, isFavorite, isFull, hydrated };
+  // hydrated is always true here: lazy initializer runs only on client
+  return { favorites, toggle, isFavorite, isFull, hydrated: true };
 }

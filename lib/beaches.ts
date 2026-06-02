@@ -1,6 +1,257 @@
-import { Beach } from "@/types";
+import { Beach, LifeguardInfo } from "@/types";
 
-export const BEACHES: Beach[] = [
+// ── Lifeguard service data ────────────────────────────────────────────────────
+// Sources: Portugal bathing season legislation, municipal announcements, APA data.
+// Only beaches with confirmed data are listed. Omitted = unknown (not shown in UI).
+
+const yr: LifeguardInfo = { type: "year-round" };
+const none: LifeguardInfo = { type: "none" };
+const s515 = (to = "10-15"): LifeguardInfo => ({ type: "seasonal", season: { from: "05-15", to } });
+const s501 = (to = "10-15"): LifeguardInfo => ({ type: "seasonal", season: { from: "05-01", to } });
+const s601 = (to = "09-30"): LifeguardInfo => ({ type: "seasonal", season: { from: "06-01", to } });
+const s701: LifeguardInfo = { type: "seasonal", season: { from: "07-01", to: "08-31" } };
+
+const LIFEGUARD: Record<string, LifeguardInfo> = {
+  // Year-round — Albufeira is the only Portuguese municipality with year-round coverage
+  "praia-dos-pescadores":   yr,
+  "praia-do-peneco":        yr,
+  "praia-de-albufeira":     yr,
+
+  // Algarve — May 15 – Oct 15 (Algarve regional season)
+  "praia-de-monte-gordo":         s515(),
+  "praia-verde":                  s515(),
+  "praia-de-manta-rota":          s515(),
+  "praia-do-barril":              s515(),
+  "praia-da-ilha-de-tavira":      s515(),
+  "praia-de-fuzeta-ilha-armona":  s515(),
+  "praia-de-fuzeta":              s515(),
+  "praia-de-faro":                s515(),
+  "praia-da-quinta-do-lago":      s515(),
+  "praia-do-garrao":              s515(),
+  "praia-das-dunas-douradas":     s515(),
+  "praia-de-vale-do-lobo":        s515(),
+  "praia-de-quarteira":           s515(),
+  "praia-de-vilamoura":           s515(),
+  "praia-da-falesia":             s515(),
+  "praia-da-rocha-baixinha":      s515(),
+  "praia-de-olhos-de-agua":       s515(),
+  "praia-da-oura":                s515(),
+  "praia-de-gale":                s515(),
+  "praia-dos-salgados":           s515(),
+  "praia-de-armacao":             s515(),
+  "praia-de-nossa-senhora-da-rocha": s515(),
+  "praia-da-marinha":             s515(),
+  "praia-de-vale-centianes":      s515(),
+  "praia-de-alfanzina":           s515(),
+  "praia-dos-caneiros":           s515(),
+  "praia-do-carvoeiro":           s515(),
+  "praia-do-pintadinho":          s515(),
+  "praia-de-ferragudo":           s515(),
+  "praia-grande-ferragudo":       s515(),
+  "praia-da-rocha":               s515(),
+  "praia-do-vau":                 s515(),
+  "praia-dos-tres-irmaos":        s515(),
+  "praia-de-alvor":               s515(),
+  "praia-do-alemao":              s515(),
+  "praia-de-meia-praia":          s515(),
+  "praia-de-porto-de-mos":        s515(),
+  "praia-dona-ana":               s515(),
+  "praia-do-pinhao":              s515(),
+  "praia-de-luz":                 s515(),
+  "praia-de-burgau":              s515(),
+  "praia-de-salema":              s515(),
+  "praia-da-mareta":              s515(),
+  "praia-do-martinhal":           s515(),
+  "praia-de-sao-rafael":          s515(),
+  "praia-do-castelo":             s515(),
+  "praia-do-almargem":            s515(),
+  "praia-do-alemao-tavira":       s515(),
+  "praia-de-pedras-d-el-rei":     s515(),
+  "praia-de-meia-praia-tavira":   s515(),
+  "praia-de-santa-luzia":         s515(),
+  "praia-nova-portimao":          s515(),
+  "praia-de-sao-joao-lagos":      s515(),
+  "praia-de-cabanas-velhas":      s515(),
+
+  // Cascais / Estoril / Oeiras — May 1 – Oct 15 (longest season in Portugal)
+  "praia-de-carcavelos":            s501(),
+  "praia-de-sao-pedro-do-estoril":  s501(),
+  "praia-do-tamariz":               s501(),
+  "praia-de-estoril":               s501(),
+  "praia-de-azarujinha":            s501(),
+  "praia-da-rainha":                s501(),
+  "praia-de-cascais":               s501(),
+  "praia-de-cascais-ribeira":       s501(),
+  "praia-da-parede":                s501(),
+  "praia-de-santo-amaro-oeiras":    s501(),
+  "praia-de-sao-pedro-estoril-norte": s501(),
+
+  // Sesimbra — Jun 6 – Sep 14 (confirmed 2025 municipal dates)
+  "praia-de-sesimbra":     { type: "seasonal", season: { from: "06-06", to: "09-14" } },
+  "praia-do-ouro-sesimbra": { type: "seasonal", season: { from: "06-06", to: "09-14" } },
+
+  // General Portugal — Jun 1 – Sep 30 (standard national season)
+  // Setúbal / Arrábida
+  "praia-de-setubal":               s601(),
+  "praia-da-figueirinha":           s601(),
+  "praia-de-galapos":               s601(),
+  "praia-do-portinho-da-arrabida":  s601(),
+  "praia-de-lagoa-de-albufeira":    s601(),
+  "praia-de-santa-maria-setubal":   s601(),
+  // Costa da Caparica
+  "praia-da-cova-do-vapor":         s601(),
+  "praia-de-caparica-norte":        s601(),
+  "praia-de-caparica-central":      s601(),
+  "praia-de-caparica-sul":          s601(),
+  "praia-de-sao-joao-caparica":     s601(),
+  "praia-de-nova-caparica":         s601(),
+  "praia-do-rei-caparica":          s601(),
+  // Sintra coast
+  "praia-de-adraga":    s601(),
+  "praia-das-macas":    s601(),
+  "praia-de-grande":    s601(),
+  "praia-de-sao-juliao": s601(),
+  // Ericeira
+  "praia-de-sao-sebastiao-ericeira": s601(),
+  "praia-dos-pescadores-ericeira":   s601(),
+  "praia-do-norte-ericeira":         s601(),
+  "praia-de-foz-do-lizandro":        s601(),
+  // Oeste
+  "praia-de-santa-cruz":      s601(),
+  "praia-de-areia-branca":    s601(),
+  "praia-de-consolacao":      s601(),
+  "praia-de-ferrel":          s601(),
+  "praia-de-peniche":         s601(),
+  "praia-de-baleal":          s601(),
+  "praia-de-sao-martinho":    s601(),
+  "praia-de-sao-pedro-de-moel": s601(),
+  "praia-da-foz-do-arelho":   s601(),
+  "praia-de-nadadouro":       s601(),
+  "praia-da-lagoa-de-obidos": s601(),
+  "praia-de-ribamar":         s601(),
+  // Nazaré
+  "praia-da-nazare": s601(),
+  // Centro / Figueira da Foz
+  "praia-do-cabedelo":       s601(),
+  "praia-do-cabedelo-viana": s601(),
+  "praia-de-buarcos":     s601(),
+  "praia-de-figueira":    s601(),
+  "praia-da-barra":       s601(),
+  "praia-da-costa-nova":  s601(),
+  "praia-da-vagueira":    s601(),
+  "praia-da-vieira":      s601(),
+  "praia-do-pedrogao":    s601(),
+  "praia-de-mira":        s601(),
+  "praia-da-torreira":    s601(),
+  "praia-de-tocha":       s601(),
+  "praia-de-gala":        s601(),
+  // Norte (Porto metro)
+  "praia-de-furadouro":       s601(),
+  "praia-de-cortegaca":       s601(),
+  "praia-de-esmoriz":         s601(),
+  "praia-de-espinho":         s601(),
+  "praia-da-granja":          s601(),
+  "praia-de-miramar":         s601(),
+  "praia-de-aguda":           s601(),
+  "praia-de-madalena":        s601(),
+  "praia-de-valadares":       s601(),
+  "praia-de-matosinhos":      s601(),
+  "praia-de-leca-da-palmeira": s601(),
+  "praia-de-lavra":           s601(),
+  "praia-de-mindelo":         s601(),
+  "praia-de-vila-do-conde":   s601(),
+  "praia-de-agucadoura":      s601(),
+  "praia-de-povoa-de-varzim": s601(),
+  "praia-de-ofir":            s601(),
+  "praia-de-esposende":       s601(),
+  "praia-de-apulia":          s601(),
+  "praia-de-viana":           s601(),
+  "praia-de-ainda":           s601(),
+  "praia-de-ancora":          s601(),
+  "praia-de-moledo":          s601(),
+  "praia-de-caminha":         s601(),
+  "praia-de-gelfa":           s601(),
+  // Alentejo popular
+  "praia-de-troia":               s601(),
+  "praia-de-troia-rei":           s601(),
+  "praia-de-vila-nova-de-milfontes": s601(),
+  "praia-do-farol-milfontes":     s601(),
+  "praia-de-porto-covo":          s601(),
+  "praia-de-sines":               s601(),
+  "praia-de-sao-torpes":          s601(),
+  "praia-de-santo-andre":         s601(),
+  "praia-de-comporta":            s601(),
+  "praia-de-carvalhal":           s601(),
+  "praia-de-lagoa-de-santo-andre": s601(),
+  "praia-de-vasco-da-gama":       s601(),
+  "praia-do-pessegueirinho":      s601(),
+
+  // Peak season only — Jul 1 – Aug 31 (remote/natural park beaches with minimal coverage)
+  "praia-de-amoreira":       s701,
+  "praia-da-arrifana":       s701,
+  "praia-do-amado":          s701,
+  "praia-de-odeceixe":       s701,
+  "praia-de-melides":        s701,
+  "praia-de-pego":           s701,
+  "praia-de-zambujeira-do-mar": s701,
+
+  // No lifeguard — confirmed remote, wild, or boat-access-only beaches
+  "praia-da-culatra":         none,
+  "praia-do-farol":           none,
+  "praia-de-cacela-velha":    none,
+  "praia-de-cabanas":         none,
+  "praia-da-cordoama":        none,
+  "praia-da-castelaria":      none,
+  "praia-do-castelejo":       none,
+  "praia-de-beliche":         none,
+  "praia-de-sagres":          none,
+  "praia-do-tonel":           none,
+  "praia-de-vale-da-telha":   none,
+  "praia-do-galapinhos":      none,
+  "praia-do-ribeiro-do-cavalo": none,
+  "praia-da-ursa":            none,
+  "praia-do-norte-nazare":    none,
+  "praia-de-sao-jacinto":     none,
+  "praia-de-monte-clerigo":   none,
+  "praia-de-carriagem":       none,
+  "praia-do-vale-dos-homens": none,
+  "praia-de-vale-figueiras":  none,
+  "praia-da-bordeira":        none,
+  "praia-de-almograve":       none,
+  "praia-de-queimado":        none,
+  "praia-de-sao-lourenco-azoia": none,
+  "praia-de-comenda":         none,
+  "praia-das-furnas":         none,
+  "praia-do-guincho":         none,
+  "praia-do-carvalho":        none,
+  "praia-de-supertubos":      none,
+  "praia-de-fisica":          none,
+  "praia-de-porto-novo":      none,
+  "praia-de-assenta":         none,
+  "praia-da-empa":            none,
+  "praia-de-brejao":          none,
+  "praia-de-alteirinhos":     none,
+  "praia-das-furnas-milfontes": none,
+  "praia-de-morgavel":        none,
+  "praia-da-ilha-do-pessegueiro": none,
+};
+
+export function getLifeguardStatus(
+  lifeguard: LifeguardInfo | undefined,
+  date: string // ISO date "YYYY-MM-DD"
+): "active" | "inactive" | "none" | "unknown" {
+  if (!lifeguard) return "unknown";
+  if (lifeguard.type === "year-round") return "active";
+  if (lifeguard.type === "none") return "none";
+  if (lifeguard.season) {
+    const mmdd = date.slice(5); // "MM-DD"
+    const { from, to } = lifeguard.season;
+    return mmdd >= from && mmdd <= to ? "active" : "inactive";
+  }
+  return "unknown";
+}
+
+export const BEACHES: Beach[] = ((): Beach[] => [
 
   // ── ALGARVE EAST (Castro Marim → Faro) ───────────────────────────────────
   { id: "praia-de-monte-gordo", name: "Praia de Monte Gordo", region: "Algarve", lat: 37.1793, lon: -7.4636, description: "Wide sandy beach near the Spanish border, warm shallow water." },
@@ -236,7 +487,7 @@ export const BEACHES: Beach[] = [
   { id: "praia-de-apulia", name: "Praia de Apúlia", region: "Norte", lat: 41.5597, lon: -8.7785, description: "Long dune beach between Esposende and Viana, surf waves." },
   { id: "praia-de-marinhas", name: "Praia de Marinhas", region: "Norte", lat: 41.5930, lon: -8.7885, description: "Wild beach with strong Atlantic swell, north of Esposende." },
   { id: "praia-de-belinho", name: "Praia de Belinho", region: "Norte", lat: 41.6122, lon: -8.7994, description: "Quiet beach south of Viana, good surf break." },
-  { id: "praia-do-cabedelo", name: "Praia do Cabedelo", region: "Norte", lat: 41.6755, lon: -8.8448, description: "Wide dune beach at the Lima river mouth, accessible by ferry from Viana.", hazards: "Strong currents near the river mouth." },
+  { id: "praia-do-cabedelo-viana", name: "Praia do Cabedelo (Viana)", region: "Norte", lat: 41.6755, lon: -8.8448, description: "Wide dune beach at the Lima river mouth, accessible by ferry from Viana.", hazards: "Strong currents near the river mouth." },
   { id: "praia-de-viana", name: "Praia de Viana do Castelo", region: "Norte", lat: 41.6888, lon: -8.8496, description: "Long beach under the iconic Santa Luzia basilica.", hazards: "Strong rip currents and powerful Atlantic swell. Northern Portugal water is cold year-round." },
 
   // ── MINHO COAST ───────────────────────────────────────────────────────────
@@ -365,7 +616,7 @@ export const BEACHES: Beach[] = [
   { id: "praia-de-ancora-norte", name: "Praia Norte (Âncora)", region: "Norte", lat: 41.8109, lon: -8.8592, description: "Northern section of Âncora beach, rockier and quieter.", hazards: "Rocky seabed. Shore break." },
   { id: "praia-fluvial-caminha", name: "Praia Fluvial de Caminha", region: "Norte", lat: 41.8759, lon: -8.8320, description: "River beach on the Minho, views to Spain. Calm freshwater." },
 
-];
+])().map((beach) => ({ ...beach, lifeguard: LIFEGUARD[beach.id] }));
 
 export function findNearestBeach(lat: number, lon: number): Beach {
   return BEACHES.reduce((nearest, beach) => {

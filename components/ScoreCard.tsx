@@ -9,19 +9,25 @@ interface Props {
   score: ComfortScore | SafetyScore;
 }
 
-const COMFORT_DETAILS = (s: ComfortScore) => [
+type Detail = { label: string; value: string };
+
+const COMFORT_DETAILS = (s: ComfortScore): Detail[] => [
   { label: "Temp", value: `${Math.round(s.details.temperatureC)}°C` },
   { label: "Wind", value: `${Math.round(s.details.windKph)} km/h` },
   { label: "Rain", value: `${Math.round(s.details.precipitationPct)}%` },
-  { label: "UV", value: String(Math.round(s.details.uvIndex)) },
-];
+  Number.isFinite(s.details.uvIndex)
+    ? { label: "UV", value: String(Math.round(s.details.uvIndex)) }
+    : null,
+].filter((d): d is Detail => d !== null);
 
-const SAFETY_DETAILS = (s: SafetyScore) => [
+const SAFETY_DETAILS = (s: SafetyScore): Detail[] => [
   { label: "Waves", value: `${s.details.waveHeightM.toFixed(1)} m` },
   { label: "Swell", value: `${s.details.swellHeightM.toFixed(1)} m` },
   { label: "Wind", value: `${Math.round(s.details.windKph)} km/h` },
-  { label: "Water", value: `${Math.round(s.details.waterTempC)}°C` },
-];
+  Number.isFinite(s.details.waterTempC)
+    ? { label: "Water", value: `${Math.round(s.details.waterTempC)}°C` }
+    : null,
+].filter((d): d is Detail => d !== null);
 
 const LEVEL_BORDER: Record<SafetyLevel, string> = {
   safe: "border-emerald-400",
@@ -75,7 +81,7 @@ export default function ScoreCard({ type, score }: Props) {
       <p className="text-slate-700 text-sm leading-snug">{score.summary}</p>
 
       {/* Details grid */}
-      <div className="grid grid-cols-4 gap-1 pt-1 border-t border-slate-100">
+      <div className={`grid ${details.length === 3 ? "grid-cols-3" : "grid-cols-4"} gap-1 pt-1 border-t border-slate-100`}>
         {details.map((d) => (
           <div key={d.label} className="flex flex-col items-center">
             <span className="text-[10px] text-slate-400 uppercase tracking-wide">

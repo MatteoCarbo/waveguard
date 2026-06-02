@@ -1,3 +1,8 @@
+export interface LifeguardInfo {
+  type: "year-round" | "seasonal" | "none";
+  season?: { from: string; to: string }; // "MM-DD" inclusive, only for 'seasonal'
+}
+
 export interface Beach {
   id: string;
   name: string;
@@ -6,6 +11,7 @@ export interface Beach {
   lon: number;
   description: string;
   hazards?: string; // static local knowledge: rocky bottom, rip currents, etc.
+  lifeguard?: LifeguardInfo;
 }
 
 export type SafetyLevel = "safe" | "caution" | "danger";
