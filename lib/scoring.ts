@@ -56,51 +56,79 @@ export function scoreSafety(d: RawDayData): SafetyScore {
 
 // ─── Comfort (is it a nice beach day?) ──────────────────────────────────────
 //
-// Temperature: <15°C → poor, 15–20 → ok, 20–28 → great, >28 → hot but fine
-// Rain probability: <20% fine, 20–50 caution, >50 poor
-// Wind: light breeze fine, strong wind ruins the experience
-// UV: informational, bonus above 4
+// Formula B — weighted base × worst-factor multiplier
 //
-// Weights: temp 50%, rain 30%, wind 20%
+// Base score (0–100):
+//   temp 50%, wind 30%, rain 20%
+//   → reflects that a good temp + calm day = nice even with some clouds
+//
+// Multipliers (applied on top, minimum wins):
+//   Rain:  the biggest veto — if it's raining it's always bad
+//     <20%  → ×1.0  |  20–40% → ×0.90  |  40–60% → ×0.50  |  >60% → ×0.15
+//   Wind:  sand in face, umbrella flying = ruins any day
+//     <25   → ×1.0  |  25–40  → ×0.90  |  40–55  → ×0.65  |  >55  → ×0.35
+//   Heat:  torrido = worse than no beach
+//     <34°C → ×1.0  |  34–37°C → ×0.80  |  >37°C → ×0.50
+
+type ComfortFactor = "rain" | "wind" | "heat" | "cold" | "good";
 
 export function scoreComfort(d: RawDayData): ComfortScore {
-  // Temperature score
-  let tempScore: number;
   const t = d.temperatureC;
-  if (t >= 20 && t <= 30) tempScore = 100;
-  else if (t >= 16 && t < 20) tempScore = 65;
-  else if (t > 30 && t <= 35) tempScore = 80;
-  else if (t > 35) tempScore = 50;
-  else if (t >= 12 && t < 16) tempScore = 30;
-  else tempScore = 0;
-
-  // Rain score
-  let rainScore: number;
-  const p = d.precipitationPct;
-  if (p < 15) rainScore = 100;
-  else if (p < 35) rainScore = 60;
-  else if (p < 60) rainScore = 25;
-  else rainScore = 0;
-
-  // Wind (comfort — strong wind = unpleasant even if not dangerous)
-  let windScore: number;
   const w = d.windKph;
-  if (w < 20) windScore = 100;
-  else if (w < 35) windScore = 65;
-  else if (w < 50) windScore = 30;
+  const p = d.precipitationPct;
+
+  // ── Sub-scores (0–100) ──────────────────────────────────────────────────
+  let tempScore: number;
+  if (t >= 22 && t <= 28) tempScore = 100;
+  else if (t > 28 && t <= 33) tempScore = 80;
+  else if (t >= 18 && t < 22) tempScore = 65;
+  else if (t > 33 && t <= 36) tempScore = 50;
+  else if (t >= 15 && t < 18) tempScore = 30;
+  else if (t > 36) tempScore = 15;
+  else tempScore = 5; // <15°C
+
+  let windScore: number;
+  if (w < 15) windScore = 100;
+  else if (w < 25) windScore = 80;
+  else if (w < 35) windScore = 55;
+  else if (w < 50) windScore = 25;
   else windScore = 0;
 
-  const score = Math.round(tempScore * 0.5 + rainScore * 0.3 + windScore * 0.2);
+  let rainScore: number;
+  if (p < 20) rainScore = 100;
+  else if (p < 40) rainScore = 65;
+  else if (p < 60) rainScore = 20;
+  else rainScore = 0;
+
+  const base = tempScore * 0.5 + windScore * 0.3 + rainScore * 0.2;
+
+  // ── Multipliers ─────────────────────────────────────────────────────────
+  const rainMult = p < 20 ? 1.0 : p < 40 ? 0.90 : p < 60 ? 0.50 : 0.15;
+  const windMult = w < 25 ? 1.0 : w < 40 ? 0.90 : w < 55 ? 0.65 : 0.35;
+  const heatMult = t < 34 ? 1.0 : t < 37 ? 0.80 : 0.50;
+
+  const multiplier = Math.min(rainMult, windMult, heatMult);
+  const score = Math.round(base * multiplier);
   const level = levelFromScore(score, { safe: 65, caution: 35 });
+
+  // Identify dominant negative factor for the summary
+  const minMult = multiplier;
+  let dominant: ComfortFactor = "good";
+  if (minMult < 1.0) {
+    if (rainMult === minMult && rainMult <= windMult && rainMult <= heatMult) dominant = "rain";
+    else if (windMult === minMult && windMult <= heatMult) dominant = "wind";
+    else if (heatMult === minMult) dominant = "heat";
+  }
+  if (dominant === "good" && t < 18) dominant = "cold";
 
   return {
     level,
     score,
-    summary: buildComfortSummary(d.temperatureC, d.precipitationPct, d.windKph, level),
+    summary: buildComfortSummary(t, p, w, level, dominant),
     details: {
-      temperatureC: d.temperatureC,
-      windKph: d.windKph,
-      precipitationPct: d.precipitationPct,
+      temperatureC: t,
+      windKph: w,
+      precipitationPct: p,
       uvIndex: d.uvIndex,
     },
   };
@@ -147,24 +175,37 @@ function buildComfortSummary(
   temp: number,
   rain: number,
   wind: number,
-  level: SafetyLevel
+  level: SafetyLevel,
+  dominant: ComfortFactor
 ): string {
   if (level === "safe") {
-    if (temp >= 25)
-      return `${Math.round(temp)}°C and sunny — a perfect beach day.`;
-    return `${Math.round(temp)}°C with light wind — great conditions.`;
+    if (temp >= 25 && rain < 20 && wind < 20)
+      return `${Math.round(temp)}°C, sunny and calm — perfect beach day.`;
+    if (dominant === "cold")
+      return `${Math.round(temp)}°C — mild but enjoyable with the right outfit.`;
+    return `${Math.round(temp)}°C with a light breeze — great conditions.`;
   }
+
   if (level === "caution") {
-    if (rain >= 35)
-      return `${Math.round(rain)}% chance of rain — bring a backup plan.`;
-    if (temp < 18)
-      return `Only ${Math.round(temp)}°C — bring a layer, might be chilly.`;
+    if (dominant === "rain")
+      return `${Math.round(rain)}% chance of rain — beach day at risk, bring a backup plan.`;
+    if (dominant === "wind")
+      return `${Math.round(wind)} km/h wind — uncomfortable on the beach, expect sand and choppy conditions.`;
+    if (dominant === "heat")
+      return `${Math.round(temp)}°C — very hot, stay hydrated and seek shade midday.`;
+    if (dominant === "cold")
+      return `Only ${Math.round(temp)}°C — too cold for most beachgoers.`;
     return `${Math.round(temp)}°C with ${Math.round(wind)} km/h wind — OK but not ideal.`;
   }
-  // poor
-  if (rain >= 60)
-    return `High chance of rain (${Math.round(rain)}%) — not a beach day.`;
-  if (temp < 14)
+
+  // danger
+  if (dominant === "rain")
+    return `${Math.round(rain)}% chance of rain — not a beach day.`;
+  if (dominant === "wind")
+    return `${Math.round(wind)} km/h wind — too windy to enjoy the beach.`;
+  if (dominant === "heat")
+    return `${Math.round(temp)}°C — dangerously hot. Avoid direct sun.`;
+  if (dominant === "cold")
     return `${Math.round(temp)}°C — too cold for the beach.`;
-  return `Poor conditions — strong wind and low temperature.`;
+  return `Poor conditions — rain and wind make this a bad beach day.`;
 }
