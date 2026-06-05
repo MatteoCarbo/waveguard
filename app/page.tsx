@@ -14,7 +14,6 @@ import ScoreCard from "@/components/ScoreCard";
 import DayStrip from "@/components/DayStrip";
 import StatusBadge from "@/components/StatusBadge";
 import UVCard from "@/components/UVCard";
-import WindCard from "@/components/WindCard";
 import EmergencyCard from "@/components/EmergencyCard";
 import SideDrawer from "@/components/SideDrawer";
 import LifeguardCard from "@/components/LifeguardCard";
@@ -204,12 +203,6 @@ export default function Home() {
                 {Number.isFinite(today.comfort.details.uvIndex) && (
                   <UVCard uvIndex={today.comfort.details.uvIndex} />
                 )}
-
-                {/* Wind card */}
-                <WindCard
-                  windKph={today.safety.details.windKph}
-                  gustsKph={today.safety.details.windGustsKph}
-                />
 
                 {/* Lifeguard status */}
                 {beach.lifeguard && (
