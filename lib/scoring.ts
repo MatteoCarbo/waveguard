@@ -66,7 +66,7 @@ export function scoreSafety(d: RawDayData): SafetyScore {
 //   Rain:  the biggest veto — if it's raining it's always bad
 //     <20%  → ×1.0  |  20–40% → ×0.90  |  40–60% → ×0.50  |  >60% → ×0.15
 //   Wind:  sand in face, umbrella flying = ruins any day
-//     <25   → ×1.0  |  25–40  → ×0.90  |  40–55  → ×0.65  |  >55  → ×0.35
+//     <15   → ×1.0  |  15–30  → ×0.90  |  30–45  → ×0.65  |  >45  → ×0.35
 //   Heat:  torrido = worse than no beach
 //     <34°C → ×1.0  |  34–37°C → ×0.80  |  >37°C → ×0.50
 
@@ -104,7 +104,7 @@ export function scoreComfort(d: RawDayData): ComfortScore {
 
   // ── Multipliers ─────────────────────────────────────────────────────────
   const rainMult = p < 20 ? 1.0 : p < 40 ? 0.90 : p < 60 ? 0.50 : 0.15;
-  const windMult = w < 25 ? 1.0 : w < 40 ? 0.90 : w < 55 ? 0.65 : 0.35;
+  const windMult = w < 15 ? 1.0 : w < 30 ? 0.90 : w < 45 ? 0.65 : 0.35;
   const heatMult = t < 34 ? 1.0 : t < 37 ? 0.80 : 0.50;
 
   const multiplier = Math.min(rainMult, windMult, heatMult);
