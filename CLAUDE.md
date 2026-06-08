@@ -1,5 +1,13 @@
 # WaveGuard — Guida per Claude Code
 
+## ⚡ Inizio sessione — leggi subito
+
+All'avvio di ogni sessione, leggi `.claude/handoff.md` se esiste.
+Contiene lo stato aggiornato del progetto, le decisioni già prese e l'ultimo punto di lavoro.
+Non chiedere conferma — leggilo direttamente e riprendi da lì.
+
+---
+
 ## Cos'è questo progetto
 App web open-source, mobile-first, per la sicurezza delle spiagge portoghesi.
 Mostra due score indipendenti — **Safety** (nuoto) e **Comfort** (giornata in spiaggia) — come badge 🟢🟡🔴 con riassunti in inglese semplice.

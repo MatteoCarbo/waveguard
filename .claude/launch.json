@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "waveguard",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "/Users/matteocarbone/Documents/Claude/Code/waveguard",
+      "port": 3000
+    }
+  ]
+}
