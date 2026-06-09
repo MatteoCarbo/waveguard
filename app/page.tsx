@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Waves, RefreshCw, Menu, Heart, LocateFixed, AlertTriangle } from "lucide-react";
@@ -20,11 +20,42 @@ import SideDrawer from "@/components/SideDrawer";
 import LifeguardCard from "@/components/LifeguardCard";
 import HazardCard from "@/components/HazardCard";
 
-// Default beach: Praia da Arrábida — beautiful and well-known
-const DEFAULT_BEACH = BEACHES.find((b) => b.id === "praia-da-arrábida") ?? BEACHES[0];
+const LAST_BEACH_KEY = "waveguard_last_beach";
+const FAVORITES_KEY  = "waveguard_favorites";
+
+function getInitialBeach(): Beach {
+  if (typeof window !== "undefined") {
+    try {
+      // 1. Last visited beach
+      const lastId = localStorage.getItem(LAST_BEACH_KEY);
+      if (lastId) {
+        const found = BEACHES.find((b) => b.id === lastId);
+        if (found) return found;
+      }
+    } catch {}
+
+    try {
+      // 2. First saved favourite
+      const raw = localStorage.getItem(FAVORITES_KEY);
+      if (raw) {
+        const ids = JSON.parse(raw) as string[];
+        const found = BEACHES.find((b) => b.id === ids[0]);
+        if (found) return found;
+      }
+    } catch {}
+  }
+
+  // 3. Default: Caparica Sul
+  return BEACHES.find((b) => b.id === "praia-de-caparica-sul") ?? BEACHES[0];
+}
 
 export default function Home() {
-  const [beach, setBeach] = useState<Beach>(DEFAULT_BEACH);
+  const [beach, setBeach] = useState<Beach>(getInitialBeach);
+
+  // Persist last visited beach so next session opens here
+  useEffect(() => {
+    try { localStorage.setItem(LAST_BEACH_KEY, beach.id); } catch {}
+  }, [beach]);
   const [dayIndex, setDayIndex] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
