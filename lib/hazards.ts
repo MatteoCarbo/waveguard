@@ -27,11 +27,9 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
       description:
         "Extremely strong tidal currents at the Tagus estuary mouth, channelled along the jetty. This is not a swimming beach under any conditions.",
       always: true,
-      geometry: {
-        type: "corridor",
-        path: [[38.66532, -9.25631], [38.66494, -9.25838]],
-        widthM: 50,
-      },
+      // Tagus estuary mouth — a broad danger area at the channel, not a thin
+      // groyne rip. Kept as a zone placed in the water off the spit.
+      geometry: { type: "zone", lat: 38.6652, lon: -9.2590, radiusM: 180 },
       source: "research/EUROSION-2004 + osm",
     },
   ],
@@ -47,7 +45,7 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
       always: true,
       geometry: {
         type: "corridor",
-        path: [[38.65480, -9.24754], [38.65545, -9.24950]],
+        path: [[38.65539, -9.24843], [38.65484, -9.25038]],
         widthM: 30,
       },
       source: "research/MDPI-2021 + osm",
@@ -65,7 +63,7 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
       always: true,
       geometry: {
         type: "corridor",
-        path: [[38.65144, -9.24630], [38.65083, -9.24827]],
+        path: [[38.65115, -9.24719], [38.65060, -9.24914]],
         widthM: 30,
       },
       source: "research/MDPI-2021 + maritime-police + osm",
@@ -84,7 +82,7 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
       triggerConditions: { waveHeightMinM: 0.8 },
       geometry: {
         type: "corridor",
-        path: [[38.64659, -9.24247], [38.64547, -9.24404]],
+        path: [[38.64594, -9.24309], [38.64539, -9.24504]],
         widthM: 30,
       },
       source: "research/MDPI-2021 + osm",
@@ -103,7 +101,7 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
       triggerConditions: { waveHeightMinM: 0.8 },
       geometry: {
         type: "corridor",
-        path: [[38.64213, -9.24181], [38.64304, -9.24359]],
+        path: [[38.64291, -9.24257], [38.64236, -9.24452]],
         widthM: 30,
       },
       source: "research/MDPI-2021 + osm",
@@ -122,7 +120,7 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
       triggerConditions: { waveHeightMinM: 0.8 },
       geometry: {
         type: "corridor",
-        path: [[38.64080, -9.23804], [38.63999, -9.23990]],
+        path: [[38.64037, -9.23886], [38.63982, -9.24081]],
         widthM: 30,
       },
       source: "maritime-police + osm",
@@ -141,7 +139,7 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
       triggerConditions: { waveHeightMinM: 0.8 },
       geometry: {
         type: "corridor",
-        path: [[38.63880, -9.23683], [38.63773, -9.23846]],
+        path: [[38.63819, -9.23748], [38.63764, -9.23943]],
         widthM: 30,
       },
       source: "local-knowledge + osm",

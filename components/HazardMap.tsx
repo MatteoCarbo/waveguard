@@ -1,9 +1,25 @@
 "use client";
 
 import { Fragment } from "react";
-import { MapContainer, TileLayer, CircleMarker, Circle, Polygon, Tooltip } from "react-leaflet";
+import { MapContainer, TileLayer, CircleMarker, Circle, Polygon, Marker, Tooltip } from "react-leaflet";
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { corridorToPolygon } from "@/lib/geo";
 import type { BeachHazard, HazardSeverity } from "@/types";
+
+// Beach pin — a teardrop marker, visually distinct from a GPS "you are here" dot
+const beachPinIcon = L.divIcon({
+  className: "",
+  html: `<div style="
+    width:26px;height:26px;transform:translate(-50%,-100%);
+    display:flex;align-items:center;justify-content:center;
+    background:#0f172a;border:2px solid #fff;border-radius:50% 50% 50% 0;
+    rotate:45deg;box-shadow:0 1px 3px rgba(0,0,0,.4);">
+    <span style="rotate:-45deg;font-size:13px;line-height:1;">🏖️</span>
+  </div>`,
+  iconSize: [26, 26],
+  iconAnchor: [0, 0],
+});
 
 interface HazardMapProps {
   beachName: string;
@@ -26,44 +42,6 @@ const SEVERITY_LABEL: Record<HazardSeverity, string> = {
   high:     "High",
   extreme:  "Extreme",
 };
-
-// ── Corridor → polygon ───────────────────────────────────────────────────────
-// Buffers a polyline (path) by widthM/2 on each side, converting metres ↔ degrees,
-// to produce a thin closed band instead of a fat circle.
-const M_PER_DEG_LAT = 111320;
-
-function corridorToPolygon(
-  path: [number, number][],
-  widthM: number
-): [number, number][] {
-  const half = widthM / 2;
-  const left: [number, number][] = [];
-  const right: [number, number][] = [];
-
-  for (let i = 0; i < path.length; i++) {
-    const [lat, lon] = path[i];
-    const prev = path[i - 1] ?? path[i];
-    const next = path[i + 1] ?? path[i];
-    const mPerDegLon = M_PER_DEG_LAT * Math.cos((lat * Math.PI) / 180);
-
-    // Segment direction in metres (east, north)
-    const dxE = (next[1] - prev[1]) * mPerDegLon;
-    const dyN = (next[0] - prev[0]) * M_PER_DEG_LAT;
-    const len = Math.hypot(dxE, dyN) || 1;
-
-    // Perpendicular (normal) unit vector: (-dyN, dxE) / len
-    const nE = -dyN / len;
-    const nN = dxE / len;
-
-    const dLon = (nE * half) / mPerDegLon;
-    const dLat = (nN * half) / M_PER_DEG_LAT;
-
-    left.push([lat + dLat, lon + dLon]);
-    right.push([lat - dLat, lon - dLon]);
-  }
-
-  return [...left, ...right.reverse()];
-}
 
 export default function HazardMap({
   beachName,
@@ -114,19 +92,10 @@ export default function HazardMap({
             attribution="&copy; OpenStreetMap"
           />
 
-          {/* Beach location marker */}
-          <CircleMarker
-            center={[lat, lon]}
-            radius={6}
-            pathOptions={{
-              color: "#ffffff",
-              weight: 2,
-              fillColor: "#0284c7",
-              fillOpacity: 1,
-            }}
-          >
+          {/* Beach pin — distinct from a GPS location dot */}
+          <Marker position={[lat, lon]} icon={beachPinIcon}>
             <Tooltip direction="top">{beachName}</Tooltip>
-          </CircleMarker>
+          </Marker>
 
           {/* Hazard overlays — geofence style: faint wide warning halo + intense
               core, derived from the same geometry (no extra data authoring) */}
