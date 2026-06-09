@@ -18,7 +18,11 @@ export type HazardSeverity = "moderate" | "high" | "extreme";
 
 export type HazardGeometry =
   | { type: "point"; lat: number; lon: number }
-  | { type: "zone"; lat: number; lon: number; radiusM: number };
+  | { type: "zone"; lat: number; lon: number; radiusM: number }
+  // corridor: a narrow band along a path (groyne rip = seaward line; shore break /
+  // longshore = shoreline-parallel line). path is [lat, lon] vertices, widthM the
+  // total width of the band in metres. Renders as a thin strip, not a big circle.
+  | { type: "corridor"; path: [number, number][]; widthM: number };
 
 export interface BeachHazard {
   id: string;                  // kebab-case unique id

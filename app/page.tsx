@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Waves, RefreshCw, Menu, Heart, LocateFixed, AlertTriangle } from "lucide-react";
@@ -19,6 +20,14 @@ import EmergencyCard from "@/components/EmergencyCard";
 import SideDrawer from "@/components/SideDrawer";
 import LifeguardCard from "@/components/LifeguardCard";
 import HazardCard from "@/components/HazardCard";
+
+// Leaflet touches `window` — must be client-only, no SSR
+const HazardMap = dynamic(() => import("@/components/HazardMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-64 w-full bg-slate-200 rounded-2xl animate-pulse" />
+  ),
+});
 
 const LAST_BEACH_KEY = "waveguard_last_beach";
 const FAVORITES_KEY  = "waveguard_favorites";
@@ -242,15 +251,25 @@ export default function Home() {
 
                 {/* Structured hazards — shown only for beaches with hazard data */}
                 {(beach.structuredHazards?.length ?? 0) > 0 && (
-                  <HazardCard
-                    hazards={beach.structuredHazards!}
-                    waveHeight={today.safety.details.waveHeightM}
-                    windSpeed={today.safety.details.windKph}
-                    ipmaWarning={
-                      ipmaWarnings?.find((w) => w.awarenessLevelID !== "green") ??
-                      null
-                    }
-                  />
+                  <>
+                    <HazardCard
+                      hazards={beach.structuredHazards!}
+                      waveHeight={today.safety.details.waveHeightM}
+                      windSpeed={today.safety.details.windKph}
+                      ipmaWarning={
+                        ipmaWarnings?.find((w) => w.awarenessLevelID !== "green") ??
+                        null
+                      }
+                    />
+                    <HazardMap
+                      beachName={beach.name}
+                      lat={beach.lat}
+                      lon={beach.lon}
+                      hazards={beach.structuredHazards!}
+                      waveHeight={today.safety.details.waveHeightM}
+                      windSpeed={today.safety.details.windKph}
+                    />
+                  </>
                 )}
 
                 {/* UV card — hidden if API returns no data */}
