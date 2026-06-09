@@ -29,8 +29,12 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
       description:
         "Extremely strong tidal currents at the Tagus estuary mouth. This is not a swimming beach under any conditions — the current here runs faster than any swimmer.",
       always: true,
-      // Estuary mouth is a genuinely broad danger area, not a thin channel
-      geometry: { type: "zone", lat: 38.6588, lon: -9.2475, radiusM: 220 },
+      // Strong seaward pull toward the Tagus mouth, off the spit — wide corridor
+      geometry: {
+        type: "corridor",
+        path: [[38.6645, -9.2567], [38.6635, -9.2586]],
+        widthM: 60,
+      },
       source: "research/EUROSION-2004",
     },
   ],
@@ -46,7 +50,7 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
       always: true,
       geometry: {
         type: "corridor",
-        path: [[38.6540, -9.2375], [38.6538, -9.2398]],
+        path: [[38.6566, -9.2510], [38.6556, -9.2529]],
         widthM: 30,
       },
       source: "surf-atlas + local-knowledge",
@@ -60,7 +64,7 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
         "Popular surf break — casual swimmers should stay away from the peak and keep watch for surfers in the water.",
       always: false,
       triggerConditions: { waveHeightMinM: 0.6 },
-      geometry: { type: "zone", lat: 38.6535, lon: -9.2392, radiusM: 110 },
+      geometry: { type: "zone", lat: 38.6561, lon: -9.2527, radiusM: 90 },
       source: "local-knowledge",
     },
   ],
@@ -76,7 +80,7 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
       always: true,
       geometry: {
         type: "corridor",
-        path: [[38.6497, -9.2370], [38.6494, -9.2393]],
+        path: [[38.6500, -9.2454], [38.6490, -9.2473]],
         widthM: 30,
       },
       source: "research/MDPI-2021 + maritime-police",
@@ -95,7 +99,7 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
       triggerConditions: { waveHeightMinM: 1.0 },
       geometry: {
         type: "corridor",
-        path: [[38.6460, -9.2366], [38.6440, -9.2366]],
+        path: [[38.64546, -9.24238], [38.64434, -9.24142]],
         widthM: 25,
       },
       source: "local-knowledge",
@@ -114,7 +118,7 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
       triggerConditions: { waveHeightMinM: 1.5 },
       geometry: {
         type: "corridor",
-        path: [[38.6435, -9.2364], [38.6415, -9.2364]],
+        path: [[38.64386, -9.24108], [38.64274, -9.24012]],
         widthM: 25,
       },
       source: "local-knowledge",
@@ -133,7 +137,7 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
       triggerConditions: { waveHeightMinM: 0.8 },
       geometry: {
         type: "corridor",
-        path: [[38.6402, -9.2362], [38.6399, -9.2385]],
+        path: [[38.6401, -9.2373], [38.6391, -9.2392]],
         widthM: 30,
       },
       source: "maritime-police + local-knowledge",
@@ -152,7 +156,7 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
       triggerConditions: { windSpeedMinKmh: 30 },
       geometry: {
         type: "corridor",
-        path: [[38.6388, -9.2360], [38.6362, -9.2360]],
+        path: [[38.63123, -9.22920], [38.62937, -9.22760]],
         widthM: 40,
       },
       source: "local-knowledge",
@@ -171,7 +175,7 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
       triggerConditions: { windSpeedMinKmh: 25 },
       geometry: {
         type: "corridor",
-        path: [[38.6360, -9.2356], [38.6330, -9.2356]],
+        path: [[38.63872, -9.23636], [38.63648, -9.23444]],
         widthM: 45,
       },
       source: "local-knowledge",
@@ -190,7 +194,7 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
       triggerConditions: { waveHeightMinM: 0.7 },
       geometry: {
         type: "corridor",
-        path: [[38.5852, -9.2050], [38.5850, -9.2073]],
+        path: [[38.5719, -9.1961], [38.5709, -9.1980]],
         widthM: 35,
       },
       source: "FEPONS-2024 + local-knowledge",
