@@ -381,20 +381,20 @@ export const BEACHES: Beach[] = ((): Beach[] => [
 
   // ── COSTA DA CAPARICA ─────────────────────────────────────────────────────
   // Generic sections — broad areas of the 26 km coast
-  { id: "praia-da-cova-do-vapor", name: "Praia da Cova do Vapor", region: "Lisboa", lat: 38.6645, lon: -9.2567, description: "Small beach at the northern tip of Caparica, near the Tagus mouth.", ipmaAreaAviso: "LSB" },
+  { id: "praia-da-cova-do-vapor", name: "Praia da Cova do Vapor", region: "Lisboa", lat: 38.66532, lon: -9.25631, description: "Small beach at the northern tip of Caparica, near the Tagus mouth.", ipmaAreaAviso: "LSB" },
   { id: "praia-de-caparica-norte", name: "Praia de Caparica (Norte)", region: "Lisboa", lat: 38.5638, lon: -9.2382, description: "Northern Caparica coast, closest to Lisbon, lively.", ipmaAreaAviso: "LSB" },
   { id: "praia-de-caparica-central", name: "Praia de Caparica (Central)", region: "Lisboa", lat: 38.5410, lon: -9.2349, description: "Lively central section of Costa da Caparica, great facilities.", ipmaAreaAviso: "LSB" },
   { id: "praia-de-caparica-sul", name: "Praia de Caparica (Sul)", region: "Lisboa", lat: 38.4977, lon: -9.2213, description: "Quieter southern end of Caparica, less crowded.", ipmaAreaAviso: "LSB" },
-  { id: "praia-de-sao-joao-caparica", name: "Praia de São João da Caparica", region: "Lisboa", lat: 38.6566, lon: -9.2510, description: "Family section of the Caparica coast with calm conditions.", ipmaAreaAviso: "LSB" },
+  { id: "praia-de-sao-joao-caparica", name: "Praia de São João da Caparica", region: "Lisboa", lat: 38.65480, lon: -9.24754, description: "Family section of the Caparica coast with calm conditions.", ipmaAreaAviso: "LSB" },
   { id: "praia-de-nova-caparica", name: "Praia Nova (Caparica)", region: "Lisboa", lat: 38.5300, lon: -9.2355, description: "Central-north Caparica section, popular with younger crowds.", ipmaAreaAviso: "LSB" },
   { id: "praia-do-rei-caparica", name: "Praia do Rei (Caparica)", region: "Lisboa", lat: 38.5070, lon: -9.2280, description: "Southern Caparica section, quieter and less developed.", ipmaAreaAviso: "LSB" },
   // Specific named sections — north → south, with structured hazard data
-  { id: "praia-do-norte-caparica", name: "Praia do Norte (Caparica)", region: "Lisboa", lat: 38.6500, lon: -9.2454, description: "Northernmost surf section of Caparica, just south of São João.", ipmaAreaAviso: "LSB" },
-  { id: "praia-do-cds", name: "Praia do CDS", region: "Lisboa", lat: 38.6449, lon: -9.2419, description: "Water-sports hub near the town centre of Costa da Caparica.", ipmaAreaAviso: "LSB" },
-  { id: "praia-do-tarquinio-paraiso", name: "Praia do Tarquínio / Paraíso", region: "Lisboa", lat: 38.6433, lon: -9.2406, description: "Family-friendly section of Caparica with beach bars and good facilities.", ipmaAreaAviso: "LSB" },
-  { id: "praia-do-dragao-vermelho", name: "Praia do Dragão Vermelho", region: "Lisboa", lat: 38.6401, lon: -9.2373, description: "Popular surf beach on the Caparica coast, known for consistent waves.", ipmaAreaAviso: "LSB" },
+  { id: "praia-do-norte-caparica", name: "Praia do Norte (Caparica)", region: "Lisboa", lat: 38.65144, lon: -9.24630, description: "Northernmost surf section of Caparica, just south of São João.", ipmaAreaAviso: "LSB" },
+  { id: "praia-do-cds", name: "Praia do CDS", region: "Lisboa", lat: 38.64659, lon: -9.24247, description: "Water-sports hub near the town centre of Costa da Caparica.", ipmaAreaAviso: "LSB" },
+  { id: "praia-do-tarquinio-paraiso", name: "Praia do Tarquínio / Paraíso", region: "Lisboa", lat: 38.64213, lon: -9.24181, description: "Family-friendly section of Caparica with beach bars and good facilities.", ipmaAreaAviso: "LSB" },
+  { id: "praia-do-dragao-vermelho", name: "Praia do Dragão Vermelho", region: "Lisboa", lat: 38.64080, lon: -9.23804, description: "Popular surf beach on the Caparica coast, known for consistent waves.", ipmaAreaAviso: "LSB" },
   { id: "praia-da-saude-caparica", name: "Praia da Saúde", region: "Lisboa", lat: 38.6303, lon: -9.2284, description: "Open section of Caparica, wide beach close to the town.", ipmaAreaAviso: "LSB" },
-  { id: "praia-da-nova-vaga", name: "Praia da Nova Vaga", region: "Lisboa", lat: 38.6376, lon: -9.2354, description: "Southern end of the urban Caparica strip, more exposed to wind.", ipmaAreaAviso: "LSB" },
+  { id: "praia-da-nova-vaga", name: "Praia da Nova Vaga", region: "Lisboa", lat: 38.63880, lon: -9.23683, description: "Southern end of the urban Caparica strip, more exposed to wind.", ipmaAreaAviso: "LSB" },
   { id: "fonte-da-telha", name: "Praia da Fonte da Telha", region: "Lisboa", lat: 38.5719, lon: -9.1961, description: "Remote southern end of the Caparica coast, cliff-backed, few facilities.", ipmaAreaAviso: "LSB" },
 
   // ── ESTORIL / CASCAIS LINE ────────────────────────────────────────────────

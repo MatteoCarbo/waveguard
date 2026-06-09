@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import { MapContainer, TileLayer, CircleMarker, Circle, Polygon, Tooltip } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import type { BeachHazard, HazardSeverity } from "@/types";
@@ -110,7 +111,7 @@ export default function HazardMap({
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; OpenStreetMap'
+            attribution="&copy; OpenStreetMap"
           />
 
           {/* Beach location marker */}
@@ -127,51 +128,50 @@ export default function HazardMap({
             <Tooltip direction="top">{beachName}</Tooltip>
           </CircleMarker>
 
-          {/* Hazard overlays */}
+          {/* Hazard overlays — geofence style: faint wide warning halo + intense
+              core, derived from the same geometry (no extra data authoring) */}
           {active.map((h) => {
             const g = h.geometry;
             if (!g) return null;
             const color = SEVERITY_COLOR[h.severity];
-            const opts = {
-              color,
-              weight: 1,
-              fillColor: color,
-              fillOpacity: 0.35,
-            };
+
+            const halo = { color, weight: 0, fillColor: color, fillOpacity: 0.13 };
+            const core = { color, weight: 1.5, fillColor: color, fillOpacity: 0.5 };
 
             if (g.type === "corridor") {
               return (
-                <Polygon
-                  key={h.id}
-                  positions={corridorToPolygon(g.path, g.widthM)}
-                  pathOptions={opts}
-                >
-                  <Tooltip sticky>{h.title}</Tooltip>
-                </Polygon>
+                <Fragment key={h.id}>
+                  <Polygon
+                    positions={corridorToPolygon(g.path, g.widthM * 3.2)}
+                    pathOptions={halo}
+                  />
+                  <Polygon
+                    positions={corridorToPolygon(g.path, g.widthM)}
+                    pathOptions={core}
+                  >
+                    <Tooltip sticky>{h.title}</Tooltip>
+                  </Polygon>
+                </Fragment>
               );
             }
             if (g.type === "zone") {
               return (
-                <Circle
-                  key={h.id}
-                  center={[g.lat, g.lon]}
-                  radius={g.radiusM}
-                  pathOptions={opts}
-                >
-                  <Tooltip sticky>{h.title}</Tooltip>
-                </Circle>
+                <Fragment key={h.id}>
+                  <Circle center={[g.lat, g.lon]} radius={g.radiusM * 1.9} pathOptions={halo} />
+                  <Circle center={[g.lat, g.lon]} radius={g.radiusM} pathOptions={core}>
+                    <Tooltip sticky>{h.title}</Tooltip>
+                  </Circle>
+                </Fragment>
               );
             }
             // point
             return (
-              <CircleMarker
-                key={h.id}
-                center={[g.lat, g.lon]}
-                radius={10}
-                pathOptions={opts}
-              >
-                <Tooltip sticky>{h.title}</Tooltip>
-              </CircleMarker>
+              <Fragment key={h.id}>
+                <CircleMarker center={[g.lat, g.lon]} radius={22} pathOptions={halo} />
+                <CircleMarker center={[g.lat, g.lon]} radius={10} pathOptions={core}>
+                  <Tooltip sticky>{h.title}</Tooltip>
+                </CircleMarker>
+              </Fragment>
             );
           })}
         </MapContainer>
