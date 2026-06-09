@@ -8,6 +8,7 @@ import { Waves, RefreshCw, Menu, Heart, LocateFixed, AlertTriangle } from "lucid
 import { Beach } from "@/types";
 import { BEACHES, findNearestBeach } from "@/lib/beaches";
 import { getBeachForecast } from "@/lib/forecast";
+import { fetchIPMAWarnings } from "@/lib/api";
 import { useFavorites } from "@/lib/useFavorites";
 import BeachSelector from "@/components/BeachSelector";
 import ScoreCard from "@/components/ScoreCard";
@@ -17,6 +18,7 @@ import UVCard from "@/components/UVCard";
 import EmergencyCard from "@/components/EmergencyCard";
 import SideDrawer from "@/components/SideDrawer";
 import LifeguardCard from "@/components/LifeguardCard";
+import HazardCard from "@/components/HazardCard";
 
 // Default beach: Praia da Arrábida — beautiful and well-known
 const DEFAULT_BEACH = BEACHES.find((b) => b.id === "praia-da-arrábida") ?? BEACHES[0];
@@ -52,6 +54,14 @@ export default function Home() {
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ["forecast", beach.id],
     queryFn: () => getBeachForecast(beach),
+  });
+
+  // IPMA maritime warnings — only fetched for beaches with an area code (Caparica)
+  const { data: ipmaWarnings } = useQuery({
+    queryKey: ["ipma-warnings", beach.ipmaAreaAviso],
+    queryFn: () => fetchIPMAWarnings(beach.ipmaAreaAviso!),
+    staleTime: 15 * 60 * 1000, // 15 minutes — matches server cache
+    enabled: !!beach.ipmaAreaAviso,
   });
 
   const today = data?.forecasts[dayIndex];
@@ -198,6 +208,19 @@ export default function Home() {
                 {/* Score cards */}
                 <ScoreCard type="safety" score={today.safety} />
                 <ScoreCard type="comfort" score={today.comfort} />
+
+                {/* Structured hazards — shown only for beaches with hazard data */}
+                {(beach.structuredHazards?.length ?? 0) > 0 && (
+                  <HazardCard
+                    hazards={beach.structuredHazards!}
+                    waveHeight={today.safety.details.waveHeightM}
+                    windSpeed={today.safety.details.windKph}
+                    ipmaWarning={
+                      ipmaWarnings?.find((w) => w.awarenessLevelID !== "green") ??
+                      null
+                    }
+                  />
+                )}
 
                 {/* UV card — hidden if API returns no data */}
                 {Number.isFinite(today.comfort.details.uvIndex) && (

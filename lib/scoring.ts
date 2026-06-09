@@ -1,5 +1,5 @@
 import { RawDayData } from "./api";
-import { ComfortScore, SafetyScore, SafetyLevel } from "@/types";
+import { BeachHazard, ComfortScore, SafetyScore, SafetyLevel } from "@/types";
 
 // ─── Safety (danger for swimmers) ───────────────────────────────────────────
 //
@@ -132,6 +132,83 @@ export function scoreComfort(d: RawDayData): ComfortScore {
       uvIndex: d.uvIndex,
     },
   };
+}
+
+// ─── Hazard penalty ──────────────────────────────────────────────────────────
+//
+// Applies a Safety score penalty when structured hazards are active.
+// Returns a complete SafetyScore with score, level, AND summary all updated
+// so they are always consistent with each other.
+//
+// Severity rules:
+//   extreme  → cap score at 29 (forces "danger" level)
+//   high     → subtract 20 pts
+//   moderate → subtract 10 pts
+//
+// Summary is rebuilt only when the level worsens, so beaches without active
+// hazards return the original score untouched.
+
+export function applyHazardPenalty(
+  base: SafetyScore,
+  hazards: BeachHazard[],
+  waveHeight: number, // wave_height_max of the day in metres
+  windSpeed: number   // wind_speed_10m_max of the day in km/h
+): SafetyScore {
+  if (!hazards?.length) return base;
+
+  const activeHazards = hazards.filter(
+    (h) =>
+      h.always ||
+      (h.triggerConditions?.waveHeightMinM !== undefined &&
+        waveHeight >= h.triggerConditions.waveHeightMinM) ||
+      (h.triggerConditions?.windSpeedMinKmh !== undefined &&
+        windSpeed >= h.triggerConditions.windSpeedMinKmh)
+  );
+
+  if (!activeHazards.length) return base;
+
+  let penalty = 0;
+  let cap = 100;
+
+  for (const h of activeHazards) {
+    if (h.severity === "extreme") cap = Math.min(cap, 29);
+    else if (h.severity === "high") penalty += 20;
+    else if (h.severity === "moderate") penalty += 10;
+  }
+
+  const newScore = Math.max(0, Math.min(cap, base.score - penalty));
+  const newLevel = levelFromScore(newScore, { safe: 70, caution: 35 });
+
+  // Rebuild summary only when level worsens — otherwise keep original text
+  const levelRank: Record<SafetyLevel, number> = { safe: 2, caution: 1, danger: 0 };
+  const levelWorsened = levelRank[newLevel] < levelRank[base.level];
+
+  return {
+    ...base,
+    score: newScore,
+    level: newLevel,
+    summary: levelWorsened
+      ? buildHazardSummary(activeHazards, newLevel)
+      : base.summary,
+  };
+}
+
+function buildHazardSummary(
+  activeHazards: BeachHazard[],
+  newLevel: SafetyLevel
+): string {
+  const extreme = activeHazards.find((h) => h.severity === "extreme");
+  const primary =
+    extreme ??
+    activeHazards.find((h) => h.severity === "high") ??
+    activeHazards[0];
+
+  if (newLevel === "danger") {
+    return extreme
+      ? `${primary.title} — stay out of the water.`
+      : `${primary.title} active — not safe for swimming today.`;
+  }
+  return `${primary.title} present — swim with extra caution.`;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

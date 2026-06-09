@@ -1,4 +1,4 @@
-import { Beach } from "@/types";
+import { Beach, IPMAWarning } from "@/types";
 
 // Open-Meteo — free, no API key, CORS-enabled
 const MARINE_BASE = "https://marine-api.open-meteo.com/v1/marine";
@@ -17,6 +17,23 @@ export interface RawDayData {
   windGustsKph: number;
   precipitationPct: number;
   uvIndex: number;
+}
+
+// Fetches active IPMA maritime warnings for a coastal area code (e.g. "LSB").
+// Calls the local Next.js proxy to avoid CORS — never call api.ipma.pt directly
+// from the browser.
+export async function fetchIPMAWarnings(
+  areaAviso: string
+): Promise<IPMAWarning[]> {
+  try {
+    const res = await fetch(
+      `/api/ipma?area=${encodeURIComponent(areaAviso)}`
+    );
+    if (!res.ok) return [];
+    return res.json() as Promise<IPMAWarning[]>;
+  } catch {
+    return [];
+  }
 }
 
 export async function fetchBeachData(beach: Beach): Promise<RawDayData[]> {
