@@ -1,23 +1,27 @@
 import type { BeachHazard } from "@/types";
 
 // ── COSTA DA CAPARICA ─────────────────────────────────────────────────────────
-// The urbanised northern strip is protected by a series of artificial groynes
-// (espigões). Each groyne creates a permanent rip channel running seaward
-// alongside it — used by surfers to paddle out, lethal for unaware bathers.
+// Every hazard below is backed by a real source. Shape follows the evidence:
+//   • espigão (groyne) rip  → corridor anchored to the real OSM groyne tip; the
+//     structure IS the documented rip location
+//   • beach documented as dangerous but with no single structure → a wider band
+//     in the surf zone parallel to the shore (no fake pinpoint precision)
+//   • estuary mouth → a zone (broad area), not a line
 //
-// Primary source: Mil Homens et al., MDPI Water 2021
-// Secondary: Polícia Marítima de Almada, FEPONS 2024, local knowledge
+// Sources:
+//   - Mil Homens et al., MDPI Water 2021 (Caparica morphodynamics / groyne rips)
+//   - Documented drownings: Dragão Vermelho (Portugal Resident), Praia da Saúde
+//     (Público, 2025-11-09), Praia Nova (2025)
+//   - IPMA per-beach hazard pages; AMN (Autoridade Marítima) rip-current notices
+//   - OSM man_made=breakwater geometry (groyne positions)
 //
-// GEOMETRY MODEL — every rip corridor is anchored to the REAL groyne geometry
-// pulled from OpenStreetMap (man_made=breakwater ways near Caparica). Each
-// corridor runs along the groyne axis, from the shore attachment out past the
-// seaward tip — i.e. exactly where the rip channel forms. Coordinates are the
-// actual OSM groyne-tip positions, not estimates.
-// Beaches without a groyne (Saúde, Fonte da Telha) use a shoreline-parallel or
-// seaward corridor instead.
+// Coordinates: groyne corridors are anchored to real OSM tips; surf-zone bands
+// and the estuary zone are placed in the water off the documented beach and are
+// approximate (verify on /hazard-preview).
 
 export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
 
+  // ── Estuary mouth — broad tidal current (zone, not a line) ──────────────────
   "praia-da-cova-do-vapor": [
     {
       id: "cova-vapor-tidal",
@@ -25,33 +29,34 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
       severity: "extreme",
       title: "Tagus estuary tidal current",
       description:
-        "Extremely strong tidal currents at the Tagus estuary mouth, channelled along the jetty. This is not a swimming beach under any conditions.",
+        "Extremely strong tidal currents at the Tagus estuary mouth. This is not a swimming beach under any conditions — the current here runs faster than any swimmer.",
       always: true,
-      // Tagus estuary mouth — a broad danger area at the channel, not a thin
-      // groyne rip. Kept as a zone placed in the water off the spit.
-      geometry: { type: "zone", lat: 38.6652, lon: -9.2590, radiusM: 180 },
-      source: "research/EUROSION-2004 + osm",
+      geometry: { type: "zone", lat: 38.6660, lon: -9.2602, radiusM: 160 },
+      source: "EUROSION-2004 + estuary-mouth (no-swim)",
     },
   ],
 
+  // ── Documented dangerous beach, no single groyne → surf-zone band ───────────
   "praia-de-sao-joao-caparica": [
     {
-      id: "sao-joao-groyne-rip",
-      type: "rip_current_fixed",
+      id: "sao-joao-rip",
+      type: "rip_current_dynamic",
       severity: "high",
-      title: "Groyne rip channel",
+      title: "Rip currents",
       description:
-        "A rip current runs seaward alongside the groyne. Stay well clear of the structure when swimming.",
-      always: true,
+        "Return currents are permanently identified near the Caparica jetties and along this surf beach. The northern half is a surf zone — keep to the flagged swimming area.",
+      always: false,
+      triggerConditions: { waveHeightMinM: 0.8 },
       geometry: {
         type: "corridor",
-        path: [[38.65539, -9.24843], [38.65484, -9.25038]],
-        widthM: 30,
+        path: [[38.65693, -9.25410], [38.65507, -9.25250]],
+        widthM: 70,
       },
-      source: "research/MDPI-2021 + osm",
+      source: "caparica-surf-guide + AMN (rip-current notice)",
     },
   ],
 
+  // ── Espigão rips — corridors anchored to real OSM groyne tips ───────────────
   "praia-do-norte-caparica": [
     {
       id: "norte-caparica-groyne-rip",
@@ -63,10 +68,10 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
       always: true,
       geometry: {
         type: "corridor",
-        path: [[38.65115, -9.24719], [38.65060, -9.24914]],
+        path: [[38.65115, -9.24719], [38.6506, -9.24914]],
         widthM: 30,
       },
-      source: "research/MDPI-2021 + maritime-police + osm",
+      source: "MDPI-2021 + AMN + osm",
     },
   ],
 
@@ -85,7 +90,7 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
         path: [[38.64594, -9.24309], [38.64539, -9.24504]],
         widthM: 30,
       },
-      source: "research/MDPI-2021 + osm",
+      source: "MDPI-2021 + osm",
     },
   ],
 
@@ -104,7 +109,7 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
         path: [[38.64291, -9.24257], [38.64236, -9.24452]],
         widthM: 30,
       },
-      source: "research/MDPI-2021 + osm",
+      source: "MDPI-2021 + osm",
     },
   ],
 
@@ -115,7 +120,7 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
       severity: "high",
       title: "Strong rip current",
       description:
-        "Powerful rip currents form alongside the groyne in moderate swell. Multiple drowning incidents recorded here, cited specifically by the Almada maritime police.",
+        "Powerful rip currents form alongside the groyne in moderate swell. A swimmer drowned here after being caught in a rip — keep clear of the structure.",
       always: false,
       triggerConditions: { waveHeightMinM: 0.8 },
       geometry: {
@@ -123,7 +128,7 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
         path: [[38.64037, -9.23886], [38.63982, -9.24081]],
         widthM: 30,
       },
-      source: "maritime-police + osm",
+      source: "drowning-report (Portugal Resident) + MDPI-2021 + osm",
     },
   ],
 
@@ -134,7 +139,7 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
       severity: "high",
       title: "Groyne rip current",
       description:
-        "Exposed southern section — a strong rip current forms alongside the groyne and is difficult to swim against.",
+        "Exposed southern section with a strong rip current alongside the groyne, difficult to swim against. A missing swimmer was recovered here.",
       always: false,
       triggerConditions: { waveHeightMinM: 0.8 },
       geometry: {
@@ -142,45 +147,47 @@ export const CAPARICA_HAZARDS: Record<string, BeachHazard[]> = {
         path: [[38.63819, -9.23748], [38.63764, -9.23943]],
         widthM: 30,
       },
-      source: "local-knowledge + osm",
+      source: "incident-report-2025 + osm",
     },
   ],
 
+  // ── Documented fatal drowning, no clear groyne → surf-zone band ─────────────
   "praia-da-saude-caparica": [
     {
-      id: "saude-longshore",
-      type: "longshore_current",
-      severity: "moderate",
-      title: "Longshore current",
+      id: "saude-rip",
+      type: "rip_current_dynamic",
+      severity: "high",
+      title: "Rip currents",
       description:
-        "No groyne in this section — a strong lateral current develops in windy conditions, drifting swimmers along the shore.",
+        "A swimmer drowned at this beach in 2025. Return currents form in the surf zone — swim only in the flagged, lifeguarded area.",
       always: false,
-      triggerConditions: { windSpeedMinKmh: 30 },
+      triggerConditions: { waveHeightMinM: 0.8 },
       geometry: {
         type: "corridor",
-        path: [[38.63123, -9.22920], [38.62937, -9.22760]],
-        widthM: 40,
+        path: [[38.63123, -9.23430], [38.62937, -9.23270]],
+        widthM: 70,
       },
-      source: "local-knowledge",
+      source: "drowning-report (Público 2025-11-09) + AMN",
     },
   ],
 
+  // ── Remote beach, documented rips, no lifeguard, no groyne → surf-zone band ──
   "fonte-da-telha": [
     {
       id: "fonte-telha-rip",
       type: "rip_current_dynamic",
       severity: "high",
-      title: "Rip current — no lifeguards",
+      title: "Rip currents — no lifeguards",
       description:
-        "Remote beach with no lifeguard supervision and strong rip currents in any swell. Not suitable for casual swimmers.",
+        "Remote beach with documented return currents (agueiros) and water rescues, and no lifeguard supervision outside summer. Not suitable for casual swimmers.",
       always: false,
       triggerConditions: { waveHeightMinM: 0.7 },
       geometry: {
         type: "corridor",
-        path: [[38.5719, -9.1961], [38.5709, -9.1980]],
-        widthM: 35,
+        path: [[38.57283, -9.19980], [38.57097, -9.19820]],
+        widthM: 70,
       },
-      source: "FEPONS-2024 + local-knowledge",
+      source: "IPMA-beach-205 + rescue-reports + AMN",
     },
   ],
 };
